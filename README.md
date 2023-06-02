@@ -1,6 +1,6 @@
 ## dugMatting: Decomposed-Uncertainty-Guided Matting [ICML 2023]
 
-![Image](https://github.com/Fire-friend/dugMatting/tree/main/temp_fig/method.png)
+![Image](https://github.com/Fire-friend/dugMatting/blob/main/temp_fig/method.png?raw=true)
 
 > ### News:
 >
