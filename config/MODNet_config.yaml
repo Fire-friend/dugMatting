@@ -1,10 +1,12 @@
 loader_mode: P3MP
+use_user_map: false
 gpu: '0'
 backbone: mobilenetv2_human #mobilenetv2_human
 data_set: P3M
-save_file: 4
+save_file: 1
 img_size: 512
-batch_size: 2
+crop_size: 512
+batch_size: 16
 num_worker: 8
 pretrain_path: ''
 lr: 0.0005
@@ -26,15 +28,15 @@ fusion: false
 rssn_denoise: false
 bgPath_denoise: ''
 fgPath_denoise: ''
-crop_size: 512
+
 val_size: 1600
 
-im_path: F:/matting/AIM-500/original/
+im_path: /hy-tmp/P3M-10k/train/blurred_image/
 fg_path: ''
 bg_path: ''
-gt_path: F:/matting/AIM-500/mask/
-val_img_path: F:/matting/AIM-500/original/ # blurred_image/  original_image/
-val_gt_path: F:/matting/AIM-500/mask/
+gt_path: /hy-tmp/P3M-10k/train/mask/
+val_img_path: /hy-tmp/P3M-10k/validation/P3M-500-P/blurred_image/
+val_gt_path: /hy-tmp/P3M-10k/validation/P3M-500-P/mask/
 trimap_path: ''
-show_img_path: F:/matting/AIM-500/original/
-show_gt_path: F:/matting/AIM-500/mask/
+show_img_path: /hy-tmp/P3M-10k/validation/P3M-500-P/blurred_image/
+show_gt_path: /hy-tmp/P3M-10k/validation/P3M-500-P/mask/

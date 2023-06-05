@@ -47,8 +47,18 @@ def compute_loss(image, gt_matte, trimap, pred_semantic, pred_detail, pred_matte
 
 
 def ITMODNet_Trainer(
-        net, image, trimap=None, gt_matte=None, sp=None, instance_map=None, user_map=None,
-        mode='modnet', blurer=None, fg=None, bg=None, args=None, epoch=None, cur_step=None, total_step=None):
+        net,
+        image,
+        trimap=None,
+        gt_matte=None,
+        user_map=None,
+        mode=None,
+        fg=None,
+        bg=None,
+        args=None,
+        epoch=None,
+        cur_step=None,
+        total_step=None):
     # forward the model
     semantic_scale = 10.0
     detail_scale = 10.0
@@ -67,57 +77,12 @@ def ITMODNet_Trainer(
     # show_user[temp_user == 0.5, :] = torch.tensor([[0, 1, 0]]).float().cuda()
     # show_user[temp_user == 1, :] = torch.tensor([[0, 0, 1]]).float().cuda()
     # show_tensor(show_user)
-    # show_tensor(show_user*0.3 + 0.7 * instance_map[0][0].unsqueeze(2))
+    # show_tensor(show_user * 0.3 + 0.7 * instance_map[0][0].unsqueeze(2))
 
     with autocast():
         # first forward
-        input = torch.cat([image, user_map], dim=1)  #, user_map
+        input = torch.cat([image, user_map], dim=1)  # , user_map
         pred_semantic, pred_detail, pred_la, pred_alpha, pred_beta, pred_matte = net(input, False)
-        #
-        # uncertainty
-        # with torch.no_grad():
-        #     alpha = pred_semantic
-        #     alpha = F.interpolate(alpha, scale_factor=4, mode='bilinear')
-        #     un = 2 / torch.sum(alpha, dim=1)
-        #     n, h, w = un.shape
-        #     un[trimap[:, 0, :, :] == 0.5] = 0
-        #     un = un.reshape(n, 16, h // 16, 16, w // 16)
-        #     un = un.permute([0, 1, 3, 2, 4]).reshape(n, 16 * 16, -1)
-        #     patch_un = torch.sum(un, dim=2)
-        #     des_index = torch.argsort(patch_un, dim=1, descending=True)
-        #     user_map = torch.zeros_like(patch_un)  # (n,256)
-        #     for i in range(len(user_map)):
-        #         user_map[i, des_index[i, :10]] = 1
-        #     user_map = user_map.reshape(n, 1, 16, 16)
-        #     user_map = F.interpolate(user_map, (h, w))
-        #     user_map -= 1
-        #     user_map[user_map == 0] = trimap[user_map == 0]
-        #     user_map += 1
-        #
-        # # user forward
-        # user_input = torch.cat([image, user_map], dim=1)
-        # user_pred_semantic, user_pred_detail, user_pred_matte = net(user_input, False)
-
-        # cluster
-        # target = torch.argmax(cluster, 1)
-        # new_target = torch.zeros_like(target) + 255
-        # sp_val, sp_num = torch.unique(sp, return_counts=True)
-        # '''refine'''
-        # for inds in sp_val:
-        #     index = sp == inds
-        #     if inds == 0:
-        #         target[index] = 255
-        #         continue
-        #     u_labels, hist = torch.unique(target[index], return_counts=True)
-        #     new_target[index] = u_labels[torch.argmax(hist)]
-        # cluster_loss = F.cross_entropy(cluster, new_target, ignore_index=255)
-
-        # calculate the semantic loss
-        # gt_semantic = F.interpolate(gt_matte, scale_factor=1 / 4, mode='bilinear')
-        # gt_semantic = blurer(gt_semantic)
-        # gt_semantic = kornia.filters.gaussian_blur2d(gt_semantic, (3, 3), (0.8, 0.8))
-        # semantic_loss = torch.mean(F.mse_loss(pred_semantic, gt_semantic))
-
         # calculate the final loss, backward the loss, and update the model
         semantic_loss, detail_loss, matte_loss = compute_loss(image, gt_matte, trimap, pred_semantic, pred_detail,
                                                               pred_matte, pred_la, pred_alpha, pred_beta, epoch, args,

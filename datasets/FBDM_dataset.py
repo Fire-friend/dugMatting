@@ -76,7 +76,7 @@ class FBDM_Dataset(Base_Dataset):
                 A.PairApplyOnlyAtIndices([0, 1], A.RandomBoxBlur(0.4, 5)),
                 A.PairApplyOnlyAtIndices([0, 1], A.RandomSharpen(0.3)),
                 A.PairApplyOnlyAtIndices([0], T.ColorJitter(0.3, 0.15, 0.15, 0.05)),
-                # A.PairApplyOnlyAtIndices([1], T.ColorJitter(0.15, 0.15, 0.15, 0.05)),
+                A.PairApplyOnlyAtIndices([1], T.ColorJitter(0.15, 0.15, 0.15, 0.05)),
                 A.PairApplyOnlyAtIndices([0, 1], T.ToTensor()),
                 A.PairApplyOnlyAtIndices([0], T.Normalize(mean=[0.485, 0.456, 0.406],
                                                           std=[0.229, 0.224, 0.225]))

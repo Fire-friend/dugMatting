@@ -1,10 +1,14 @@
 loader_mode: P3MP
-gpu: '0'
+use_user_map: true
+fusion: false
+inter_num: 1
+gpu: '2,3'
 backbone: mobilenetv2_human #mobilenetv2_human
 data_set: P3M
-save_file: 4
+save_file: 1
 img_size: 512
-batch_size: 2
+crop_size: 512
+batch_size: 8
 num_worker: 8
 pretrain_path: ''
 lr: 0.0005
@@ -21,20 +25,19 @@ in_channels: 4
 hr_channels: 32
 warmup_step: 5
 amp: true
-fusion: false
 
 rssn_denoise: false
 bgPath_denoise: ''
 fgPath_denoise: ''
-crop_size: 512
+
 val_size: 1600
 
-im_path: F:/matting/AIM-500/original/
+im_path: /data/yao/wjw/P3M/P3M-10k/train/blurred_image/
 fg_path: ''
 bg_path: ''
-gt_path: F:/matting/AIM-500/mask/
-val_img_path: F:/matting/AIM-500/original/ # blurred_image/  original_image/
-val_gt_path: F:/matting/AIM-500/mask/
+gt_path: /data/yao/wjw/P3M/P3M-10k/train/mask/
+val_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
+val_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/
 trimap_path: ''
-show_img_path: F:/matting/AIM-500/original/
-show_gt_path: F:/matting/AIM-500/mask/
+show_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
+show_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/

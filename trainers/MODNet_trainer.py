@@ -30,7 +30,7 @@ def MODNet_Trainer(
         # calculate the semantic loss
         gt_semantic = F.interpolate(gt_matte, scale_factor=1 / 16, mode='bilinear')
         # gt_semantic = blurer(gt_semantic)
-        gt_semantic = kornia.gaussian_blur2d(gt_semantic, (3, 3), (0.8, 0.8))
+        gt_semantic = kornia.filters.gaussian_blur2d(gt_semantic, (3, 3), (0.8, 0.8))
         semantic_loss = torch.mean(F.mse_loss(pred_semantic, gt_semantic))
         semantic_loss = semantic_scale * semantic_loss
 

@@ -140,12 +140,15 @@ def generate_composite_coco(fg, bg, mask):
 
 
 def gen_trimap_with_dilate(alpha, kernel_size):
+    h, w = alpha.shape
+    alpha = cv2.resize(alpha, (512, 512), cv2.INTER_LINEAR)
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
     fg_and_unknown = np.array(np.not_equal(alpha, 0).astype(np.float32))
     fg = np.array(np.equal(alpha, 255).astype(np.float32))
     dilate = cv2.dilate(fg_and_unknown, kernel, iterations=1)
     erode = cv2.erode(fg, kernel, iterations=1)
     trimap = erode * 255 + (dilate - erode) * 128
+    trimap = cv2.resize(trimap, (w, h), cv2.INTER_NEAREST)
     return trimap.astype(np.uint8)
 
 
@@ -217,6 +220,7 @@ class P3MP_Dataset(Base_Dataset):
         self.merge_files.sort()
         self.gt_files.sort()
         self.trimap_path = args.trimap_path
+        self.use_user_map = args.use_user_map
 
         print('{} numbers: {}'.format(mode, len(self.merge_files)))
 
@@ -274,9 +278,10 @@ class P3MP_Dataset(Base_Dataset):
         # prior_trimap = prior.copy()
         # prior_trimap[prior_trimap == -1] = 1
 
-        label_alpha = mask[0]
-        instanMap = getInstanceMap(label_alpha)
-        prior = generateRandomPriorDIM(label_alpha.cpu().numpy(), r=5, mode='rect')
+        if self.use_user_map:
+            prior = torch.from_numpy(generateRandomPriorDIM(mask[0].cpu().numpy(), r=5, mode='rect')).unsqueeze(0)
+        else:
+            prior = mask
 
         # shadow
         # if random.random() < 0.5:
@@ -299,8 +304,7 @@ class P3MP_Dataset(Base_Dataset):
         fg = normalize(fg)
         bg = normalize(bg)
 
-        return ori, mask, trimap, fg, bg, instanMap.unsqueeze(0), torch.from_numpy(
-            prior).unsqueeze(0), label_alpha.unsqueeze(0), item
+        return ori, mask, trimap, fg, bg, prior, item
 
     def get_val_data(self, item: int) -> VAL_TYPE:
         fg_index = item % len(self.merge_files)

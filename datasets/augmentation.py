@@ -233,8 +233,8 @@ class PairCrop(object):
         for item in argv:
             item = np.array(item)
             item = item[leftx:min(leftx + crop_size, h), topy:min(topy + crop_size, w)]
-            # if index == 1:
-            #     item = cv2.resize(item, (resize_size, resize_size), interpolation=cv2.INTER_NEAREST)
+            if index == 1:
+                item = cv2.resize(item, (resize_size, resize_size), interpolation=cv2.INTER_NEAREST)
             item = cv2.resize(item, (resize_size, resize_size), interpolation=cv2.INTER_LINEAR)
             argv_transform.append(Image.fromarray(item))
             index += 1

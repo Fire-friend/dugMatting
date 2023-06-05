@@ -1038,11 +1038,12 @@ def MLE_loss_bb(p, alpha, beta, global_step, annealing_step=1):
     A = (j4 + j5 + j6) - (j1 + j2 + j3)
 
     annealing_coef = min(1, global_step / annealing_step)
-    alp = (alpha-1) * (1 - p)+1
-    bta = (beta-1) * p+1
+    alp = (alpha - 1) * (1 - p) + 1
+    bta = (beta - 1) * p + 1
     loss_r = KL_beta(alp, bta)
     B = annealing_coef * loss_r
     return A + B
+
 
 def mse_loss_bb(p, alpha, beta, global_step, annealing_step=1):
     # ignore_index = (p > 0) * (p < 1)
@@ -1058,7 +1059,7 @@ def mse_loss_bb(p, alpha, beta, global_step, annealing_step=1):
     m_be = beta / S
     label = p.reshape(-1, 1)
     A = (label - m_al) ** 2 + alpha * (S - alpha) / (S * S * (S + 1))
-    B = (1-label - m_be) ** 2 + beta * (S - beta) / (S * S * (S + 1))
+    B = (1 - label - m_be) ** 2 + beta * (S - beta) / (S * S * (S + 1))
     annealing_coef = min(1, global_step / annealing_step)
     alp = E_al * (1 - label) + 1
     bta = E_be * label + 1
@@ -1067,30 +1068,33 @@ def mse_loss_bb(p, alpha, beta, global_step, annealing_step=1):
     # loss = loss * ~ignore_index.view(-1, 1)
     return loss
 
+
 def criterion_nig(u, la, alpha, beta, y, step=None, totalStep=None):
     # our loss function
     om = 2 * beta * (1 + la)
     log_phi = torch.lgamma(alpha) - torch.lgamma(alpha + 0.5)
     loss = 0.5 * torch.log(np.pi / la) - alpha * torch.log(om) + (alpha + 0.5) * torch.log(
-        la * (u - y) ** 2 + om) #+ log_phi  #
+        la * (u - y)**2 + om) + log_phi  #
     # weight = torch.zeros_like(u)
     # weight[torch.abs(u-y) > 0.1] = 1
-    lossr = 0.01 * torch.abs(u-y) * (2 * la + alpha)
+    lossr = 0.01 * torch.abs(u - y) * (2 * la + alpha)
     # lossr = kl_divergence_nig(u, y, alpha, beta, la)
     loss = loss + lossr
     return loss
+
 
 def criterion_nig2(u, la, alpha, beta, y, step=None, totalStep=None):
     # our loss function
     # om = 2 * beta * (1 + la)
     log_phi = torch.lgamma(alpha) - torch.lgamma(alpha + 0.5)
-    loss = 0.5 * torch.log(2*np.pi *beta) + (alpha + 0.5) * torch.log(1+(u-y)**2/(2*beta)) + log_phi
+    loss = 0.5 * torch.log(2 * np.pi * beta) + (alpha + 0.5) * torch.log(1 + (u - y) ** 2 / (2 * beta)) + log_phi
     # weight = torch.zeros_like(u)
     # weight[torch.abs(u-y) > 0.1] = 1
-    lossr = 0.05 * torch.abs(u-y) * (2 * la + alpha)
+    lossr = 0.05 * torch.abs(u - y) * (2 * la + alpha)
     # lossr = kl_divergence_nig(u, y, alpha, beta, la)
     loss = loss + lossr
     return loss
+
 
 def kl_divergence_nig(mu1, mu2, alpha_1, beta_1, lambda_1):
     alpha_2 = torch.ones_like(mu1) * 1.0

@@ -44,7 +44,7 @@ def main_worker(rank, n_pros):
     writer = SummaryWriter(args.log_path)
 
     torch.cuda.set_device(rank)
-    dist.init_process_group(backend='gloo', init_method='tcp://127.0.0.1:{}'.format(args.port), world_size=n_pros,
+    dist.init_process_group(backend='nccl', init_method='tcp://127.0.0.1:{}'.format(args.port), world_size=n_pros,
                             rank=rank)
 
     # get the dataset dynamically
@@ -155,9 +155,7 @@ def main_worker(rank, n_pros):
             merge_trimap = label_data[2]
             merge_fg = label_data[3]
             merge_bg = label_data[4]
-            instance_map = label_data[5]
-            user_map = label_data[6]
-            sp_label = label_data[-2]
+            user_map = label_data[5]
             idx = label_data[-1]
             if args.aug_crop:
                 merge_img, merge_alpha, merge_trimap, merge_fg, merge_bg = \
@@ -180,9 +178,7 @@ def main_worker(rank, n_pros):
                                    merge_img.cuda().float(),
                                    merge_trimap.cuda().float(),
                                    merge_alpha.cuda().float(),
-                                   instance_map=instance_map.cuda().float(),
                                    user_map=user_map.cuda().float(),
-                                   sp=sp_label.cuda().float(),
                                    mode=args.model,
                                    fg=merge_fg.cuda().float(),
                                    bg=merge_bg.cuda().float(),
@@ -243,7 +239,8 @@ def main_worker(rank, n_pros):
                                               label_img,
                                               label_alpha,
                                               trimap,
-                                              fusion=args.fusion)
+                                              fusion=args.fusion,
+                                              interac=args.inter_num)
                     error_sad, error_mad, error_mse, error_grad, sad_fg, sad_bg, sad_tran = eval_out[0], eval_out[1], \
                                                                                             eval_out[2], eval_out[3], \
                                                                                             eval_out[4], eval_out[5], \

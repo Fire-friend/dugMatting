@@ -22,12 +22,12 @@ y_label = None
 Auc = 0
 
 
-def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False):
+def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
     global precision_global, recall_global, index_global, y_pred, y_label, Auc
     instance_map = torch.zeros_like(input)[:, 0:1]
     # user_map = torch.zeros_like(input)[:, 0:1]
     last_output = None
-    for it in range(2):
+    for it in range(interac):
         input_temp = torch.cat([input, instance_map], dim=1)
         last_out = net(input_temp, inference=True)
         cur_matte = last_out[-1]
@@ -43,44 +43,44 @@ def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False):
 
         if fusion_matte.shape[2] != gt.shape[2]:
             fusion_matte = F.interpolate(fusion_matte, (gt.shape[2], gt.shape[3]), mode='bilinear')
+        if it < interac - 1:
+            # uncertainty
+            with torch.no_grad():
+                un = last_out[4] / (last_out[2] * (last_out[3] - 1))
+                alea_un = last_out[4] / ((last_out[3] - 1))
+                alea_var = (last_out[4] ** 2) / (((last_out[3] - 1) ** 2) * (last_out[3] - 2))
+                roi = select_roi(alea_var)
+                alea_un[roi] = 0
+                un = un.squeeze(1)
+                alea_un = alea_un.squeeze(1)
+                last_un = un
+                # un[trimap[:, 0, :, :] == 0.5] = 0
+                n, h, w = un.shape
+                temp_gt = F.interpolate(gt, (h, w))
+                temp_gt[(temp_gt > 0) * (temp_gt < 1)] = 0.5
+                patch_num = 32
+                N = 10
+                un = un.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
+                un = un.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
+                patch_un = torch.mean(un, dim=2)
+                temp_gt = temp_gt.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
+                temp_gt = temp_gt.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
+                patch_gt = torch.mean(temp_gt, dim=2)
 
-        # uncertainty
-        with torch.no_grad():
-            un = last_out[4] / (last_out[2] * (last_out[3] - 1))
-            alea_un = last_out[4] / ((last_out[3] - 1))
-            alea_var = (last_out[4] ** 2) / (((last_out[3] - 1) ** 2) * (last_out[3] - 2))
-            roi = select_roi(alea_var)
-            alea_un[roi] = 0
-            un = un.squeeze(1)
-            alea_un = alea_un.squeeze(1)
-            last_un = un
-            # un[trimap[:, 0, :, :] == 0.5] = 0
-            n, h, w = un.shape
-            temp_gt = F.interpolate(gt, (h, w))
-            temp_gt[(temp_gt > 0) * (temp_gt < 1)] = 0.5
-            patch_num = 32
-            N = 10
-            un = un.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
-            un = un.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
-            patch_un = torch.mean(un, dim=2)
-            temp_gt = temp_gt.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
-            temp_gt = temp_gt.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
-            patch_gt = torch.mean(temp_gt, dim=2)
+                des_index = torch.argsort(patch_un, dim=1, descending=True)
+                user_map = torch.zeros_like(patch_un)  # (n,256)
+                for i in range(len(user_map)):
+                    # user_map[i, des_index[i, :10]] = 1
+                    gt_map = patch_gt[i, des_index[i, :N]]
+                    user_map[i, des_index[i, :N][gt_map == 1]] = 1
+                    user_map[i, des_index[i, :N][gt_map == 0]] = -1
+                    user_map[i, des_index[i, :N][(gt_map > 0) * (gt_map < 1)]] = 0.5
 
-            des_index = torch.argsort(patch_un, dim=1, descending=True)
-            user_map = torch.zeros_like(patch_un)  # (n,256)
-            for i in range(len(user_map)):
-                # user_map[i, des_index[i, :10]] = 1
-                gt_map = patch_gt[i, des_index[i, :N]]
-                user_map[i, des_index[i, :N][gt_map == 1]] = 1
-                user_map[i, des_index[i, :N][gt_map == 0]] = -1
-                user_map[i, des_index[i, :N][(gt_map > 0) * (gt_map < 1)]] = 0.5
-
-            user_map = user_map.reshape(n, 1, patch_num, patch_num)
-            user_map = F.interpolate(user_map, (h, w))
-            new_user_map = F.interpolate(instance_map, (h, w))
-            new_user_map[user_map != 0] = user_map[user_map != 0]
-            instance_map = new_user_map
+                user_map = user_map.reshape(n, 1, patch_num, patch_num)
+                user_map = F.interpolate(user_map, (h, w))
+                new_user_map = F.interpolate(instance_map, (h, w))
+                new_user_map[user_map != 0] = user_map[user_map != 0]
+                instance_map = new_user_map
 
     error_sad, error_mad, error_mse, error_grad, sad_fg, sad_bg, sad_tran, conn = computeAllMatrix(fusion_matte,
                                                                                                    gt,
