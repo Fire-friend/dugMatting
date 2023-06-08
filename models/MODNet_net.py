@@ -222,12 +222,12 @@ class MODNet_Net(nn.Module):
         self.hr_branch = HRBranch(self.hr_channels, self.backbone.enc_channels)
         self.f_branch = FusionBranch(self.hr_channels, self.backbone.enc_channels)
 
-        for m in self.modules():
-            if isinstance(m, nn.Conv2d):
-                self._init_conv(m)
-            elif isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.InstanceNorm2d):
-                self._init_norm(m)
-        self.backbone.load_pretrained_ckpt()
+        # for m in self.modules():
+        #     if isinstance(m, nn.Conv2d):
+        #         self._init_conv(m)
+        #     elif isinstance(m, nn.BatchNorm2d) or isinstance(m, nn.InstanceNorm2d):
+        #         self._init_norm(m)
+        # self.backbone.load_pretrained_ckpt()
 
     def forward(self, img, inference=False):
         # show

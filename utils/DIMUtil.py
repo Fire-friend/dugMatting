@@ -68,9 +68,18 @@ def generateRandomPriorDIM(alpha, r=5, mode='circle', val=False):
         nums_bg = 5
         nums_t = 5
     else:
-        nums_fg = np.random.geometric(1 / 6)
-        nums_bg = np.random.geometric(1 / 6)
-        nums_t = np.random.geometric(1 / 6)
+        if random.random() < 0.5:
+            nums_fg = np.random.geometric(1 / 6)
+        else:
+            nums_fg = 0
+        if random.random() < 0.5:
+            nums_bg = np.random.geometric(1 / 6)
+        else:
+            nums_bg = 0
+        if random.random() < 0.5:
+            nums_t = np.random.geometric(1 / 6)
+        else:
+            nums_t = 0
         #
         # nums_fg = max(0, random.randint(-3, 6))
         # nums_bg = max(0, random.randint(-3, 6))

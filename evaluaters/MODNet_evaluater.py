@@ -3,7 +3,7 @@ import torch
 from utils.eval import computeAllMatrix
 import torch.nn.functional as F
 
-def MODNet_Evaluater(net, input, gt, trimap, fusion=False):
+def MODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
     out = net(input, True)
     matte = out[-1]
     if matte.shape[2] != gt.shape[2]:

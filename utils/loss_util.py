@@ -1072,9 +1072,9 @@ def mse_loss_bb(p, alpha, beta, global_step, annealing_step=1):
 def criterion_nig(u, la, alpha, beta, y, step=None, totalStep=None):
     # our loss function
     om = 2 * beta * (1 + la)
-    log_phi = torch.lgamma(alpha) - torch.lgamma(alpha + 0.5)
+    # log_phi = torch.lgamma(alpha) - torch.lgamma(alpha + 0.5)
     loss = 0.5 * torch.log(np.pi / la) - alpha * torch.log(om) + (alpha + 0.5) * torch.log(
-        la * (u - y)**2 + om) + log_phi  #
+        la * (u - y)**2 + om) #+ log_phi  #
     # weight = torch.zeros_like(u)
     # weight[torch.abs(u-y) > 0.1] = 1
     lossr = 0.01 * torch.abs(u - y) * (2 * la + alpha)

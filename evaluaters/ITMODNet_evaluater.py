@@ -22,7 +22,7 @@ y_label = None
 Auc = 0
 
 
-def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
+def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2, instance_map=None):
     global precision_global, recall_global, index_global, y_pred, y_label, Auc
     instance_map = torch.zeros_like(input)[:, 0:1]
     # user_map = torch.zeros_like(input)[:, 0:1]
@@ -43,7 +43,7 @@ def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
 
         if fusion_matte.shape[2] != gt.shape[2]:
             fusion_matte = F.interpolate(fusion_matte, (gt.shape[2], gt.shape[3]), mode='bilinear')
-        if it < interac - 1:
+        if it < interac:
             # uncertainty
             with torch.no_grad():
                 un = last_out[4] / (last_out[2] * (last_out[3] - 1))
@@ -58,13 +58,25 @@ def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
                 n, h, w = un.shape
                 temp_gt = F.interpolate(gt, (h, w))
                 temp_gt[(temp_gt > 0) * (temp_gt < 1)] = 0.5
-                patch_num = 32
+                patch_size = 10
+                pad_h = h % patch_size
+                pad_w = w % patch_size
+                patch_num_h = h // patch_size
+                patch_num_w = w // patch_size
                 N = 10
-                un = un.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
-                un = un.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
+                un = un[:, pad_h // 2:pad_h // 2 + h - pad_h, pad_w // 2:pad_w // 2 + w - pad_w].reshape(n,
+                                                                                                         patch_num_h,
+                                                                                                         h // patch_num_h,
+                                                                                                         patch_num_w,
+                                                                                                         w // patch_num_w)
+                un = un.permute([0, 1, 3, 2, 4]).reshape(n, patch_num_h * patch_num_w, -1)
                 patch_un = torch.mean(un, dim=2)
-                temp_gt = temp_gt.reshape(n, patch_num, h // patch_num, patch_num, w // patch_num)
-                temp_gt = temp_gt.permute([0, 1, 3, 2, 4]).reshape(n, patch_num * patch_num, -1)
+                temp_gt = temp_gt[:, :, pad_h // 2:pad_h // 2 + h - pad_h, pad_w // 2:pad_w // 2 + w - pad_w].reshape(n,
+                                                                                                                      patch_num_h,
+                                                                                                                      h // patch_num_h,
+                                                                                                                      patch_num_w,
+                                                                                                                      w // patch_num_w)
+                temp_gt = temp_gt.permute([0, 1, 3, 2, 4]).reshape(n, patch_num_h * patch_num_w, -1)
                 patch_gt = torch.mean(temp_gt, dim=2)
 
                 des_index = torch.argsort(patch_un, dim=1, descending=True)
@@ -76,11 +88,18 @@ def ITMODNet_Evaluater(net, input, gt, trimap, fusion=False, interac=2):
                     user_map[i, des_index[i, :N][gt_map == 0]] = -1
                     user_map[i, des_index[i, :N][(gt_map > 0) * (gt_map < 1)]] = 0.5
 
-                user_map = user_map.reshape(n, 1, patch_num, patch_num)
-                user_map = F.interpolate(user_map, (h, w))
+                user_map = user_map.reshape(n, 1, patch_num_h, patch_num_w)
+                user_map = F.interpolate(user_map, (h - pad_h, w - pad_w))
+                user_map = F.pad(user_map, (pad_w // 2, pad_w - pad_w // 2, pad_h // 2, pad_h - pad_h // 2),
+                                 "constant", 0)
                 new_user_map = F.interpolate(instance_map, (h, w))
                 new_user_map[user_map != 0] = user_map[user_map != 0]
                 instance_map = new_user_map
+        else:
+            new_user_map = torch.zeros_like(gt)
+            last_un = torch.zeros_like(gt).squeeze(0)
+            alea_un = torch.zeros_like(gt).squeeze(0)
+            alea_var = torch.zeros_like(gt)
 
     error_sad, error_mad, error_mse, error_grad, sad_fg, sad_bg, sad_tran, conn = computeAllMatrix(fusion_matte,
                                                                                                    gt,

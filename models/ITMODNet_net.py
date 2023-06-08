@@ -180,22 +180,35 @@ class FusionBranch(nn.Module):
         self.conv_lr4x = Conv2dIBNormRelu(enc_channels[2], hr_channels, 5, stride=1, padding=2)
 
         self.conv_f2x = Conv2dIBNormRelu(2 * hr_channels, hr_channels, 3, stride=1, padding=1)
+        # self.conv_f2x_f = Conv2dIBNormRelu(hr_channels + in_ch, int(hr_channels / 2), 3, stride=1, padding=1)
+
         self.conv_f = nn.Sequential(
             Conv2dIBNormRelu(hr_channels + in_ch, int(hr_channels / 2), 3, stride=1, padding=1),
             Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False, with_relu=False),
         )
+        # self.conv_f = Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False,
+        #                                with_relu=False)
+
         self.conv_lamda = nn.Sequential(
             Conv2dIBNormRelu(hr_channels + in_ch, int(hr_channels / 2), 3, stride=1, padding=1),
             Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False, with_relu=False),
         )
+        # self.conv_lamda = Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False,
+        #                                    with_relu=False)
+
         self.conv_alpha = nn.Sequential(
             Conv2dIBNormRelu(hr_channels + in_ch, int(hr_channels / 2), 3, stride=1, padding=1),
             Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False, with_relu=False),
         )
+        # self.conv_alpha = Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False,
+        #                                    with_relu=False)
+
         self.conv_beta = nn.Sequential(
             Conv2dIBNormRelu(hr_channels + in_ch, int(hr_channels / 2), 3, stride=1, padding=1),
             Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False, with_relu=False),
         )
+        # self.conv_beta = Conv2dIBNormRelu(int(hr_channels / 2), 1, 1, stride=1, padding=0, with_ibn=False,
+        #                                   with_relu=False)
 
     def forward(self, img, lr8x, hr2x):
         lr4x = F.interpolate(lr8x, scale_factor=2, mode='bilinear', align_corners=False)
@@ -205,6 +218,8 @@ class FusionBranch(nn.Module):
         f2x = self.conv_f2x(torch.cat((lr2x, hr2x), dim=1))
         f = F.interpolate(f2x, scale_factor=2, mode='bilinear', align_corners=False)
         last_in = torch.cat((f, img), dim=1)
+        # last_in = self.conv_f2x_f(last_in)
+
         f = self.conv_f(last_in)
         pred_matte = torch.sigmoid(f)
         pred_la = F.softplus(self.conv_lamda(last_in)) + 0.1
@@ -230,9 +245,11 @@ class ITMODNet_Net(nn.Module):
         self.in_channels = in_channels
         self.hr_channels = hr_channels
         self.backbone_arch = backbone_arch
-        # self.match = nn.Conv2d(self.in_channels, 3, 3, 1, 1)
+        # self.match = nn.Conv2d(self.in_channels + 1, self.in_channels, 3, 1, 1)
+
         self.backbone = SUPPORTED_BACKBONES[self.backbone_arch](self.in_channels)
-        self.backbone.model.features[0][0] = nn.Conv2d(in_channels, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        self.backbone.model.features[0][0] = nn.Conv2d(in_channels, 32, kernel_size=(3, 3), stride=(2, 2),
+                                                       padding=(1, 1), bias=False)
 
         self.lr_branch = LRBranch(self.backbone)
         self.hr_branch = HRBranch(self.hr_channels, self.backbone.enc_channels, self.in_channels)
@@ -246,10 +263,10 @@ class ITMODNet_Net(nn.Module):
         # self.backbone.load_pretrained_ckpt()
 
     def forward(self, input, inference=False):
-        # img = self.match(input)
+        # input = self.match(input)
         # show
         # show_tensor(img.permute([0, 2, 3, 1])[0])
-        # img = input[:, :3]
+        # input = input[:, :3] + 0 * self.match(input)
         pred_semantic, lr8x, [enc2x, enc4x] = self.lr_branch(input, inference)
         pred_detail, hr2x = self.hr_branch(input, enc2x, enc4x, lr8x, inference)
         pred_matte, pred_la, pred_alpha, pred_beta = self.f_branch(input, lr8x, hr2x)

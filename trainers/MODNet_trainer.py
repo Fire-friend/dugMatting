@@ -44,8 +44,8 @@ def MODNet_Trainer(
 
         # calculate the matte loss
         pred_boundary_matte = torch.where(boundaries, trimap, pred_matte)
-        matte_l1_loss = F.l1_loss(pred_matte, gt_matte) + 4.0 * F.l1_loss(pred_boundary_matte, gt_detail)
-        matte_compositional_loss = F.l1_loss(image * pred_matte, image * gt_matte) \
+        matte_l1_loss = F.mse_loss(pred_matte, gt_matte) + 4.0 * F.l1_loss(pred_boundary_matte, gt_detail)
+        matte_compositional_loss = F.mse_loss(image * pred_matte, image * gt_matte) \
                                    + 4.0 * F.l1_loss(image * pred_boundary_matte, image * gt_detail)
         matte_loss = matte_l1_loss + matte_compositional_loss
         matte_loss = matte_scale * matte_loss

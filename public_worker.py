@@ -107,7 +107,7 @@ def main_worker(rank, n_pros):
     net = torch.nn.parallel.DistributedDataParallel(net,
                                                     device_ids=[rank],
                                                     output_device=rank,
-                                                    find_unused_parameters=False)
+                                                    find_unused_parameters=True)
     # torch.autograd.set_detect_anomaly(True)
     # load pretrained parameters
     if args.pretrain_path != '' and args.pretrain_path is not None:

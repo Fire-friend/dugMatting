@@ -1,9 +1,9 @@
 loader_mode: P3MP
 use_user_map: true
 fusion: false
-inter_num: 1
+inter_num: 2
 gpu: '2,3'
-backbone: mobilenetv2_human #mobilenetv2_human
+backbone: mobilenetv2 #mobilenetv2_human
 data_set: P3M
 save_file: 1
 img_size: 512

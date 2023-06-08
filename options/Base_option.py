@@ -9,7 +9,7 @@ class Base_options():
     def initialize(self):
         self.parser = argparse.ArgumentParser(description='Arguments for the training purpose.')
         # public--------------------
-        self.parser.add_argument('--model', type=str, default='ITMODNet',
+        self.parser.add_argument('--model', type=str, default='MODNet',
                                  choices=["MODNet", "ITMODNet"],
                                  help="training model")
 

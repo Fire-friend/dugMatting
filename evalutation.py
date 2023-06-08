@@ -13,22 +13,22 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 from cv2 import resize
 
-from matting_post_tools import edge_region_refine, muti_scale_prediction
-from models.bfdnet7 import bfdNet
-# from models.FBDM import FBDM as bfdNet
-from models.FBDMv2_net_eff import FBDMv2_Net as bfdNet
-from models.FBDM_img import FBDM_IMG
-from models.gfm import GFM
-from models.modnet import MODNet
-from models.modnet import MODNet as MODNet_source
-from models.u2net import U2NET
+# from matting_post_tools import edge_region_refine, muti_scale_prediction
+# from models.bfdnet7 import bfdNet
+# # from models.FBDM import FBDM as bfdNet
+# from models.FBDMv2_net_eff import FBDMv2_Net as bfdNet
+# from models.FBDM_img import FBDM_IMG
+# from models.gfm import GFM
+# from models.modnet import MODNet
+# from models.modnet import MODNet as MODNet_source
+# from models.u2net import U2NET
 from datasets.data_util import *
 # from pytorch_toolbelt.inference import tta
-import tta
+# import tta
 # from torchstat import stat
 
 from utils.eval import computeAllMatrix
-from utils.uncertainty_eva import CalibratedRegression
+# from utils.uncertainty_eva import CalibratedRegression
 from utils.util import get_yaml_data, set_yaml_to_args, getPackByNameUtil
 from tqdm import tqdm
 
@@ -42,7 +42,7 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('--ckpt-path', type=str, help='path of pre-trained MODNet',
 #                     default='./checkSave/FBDMv2/AM2K/19/checkpoint/model_best')
 parser.add_argument('--model', type=str, help='path of pre-trained MODNet',
-                    default='REITMODNet')
+                    default='ITMODNet')
 parser.add_argument('--gpu', type=str, help='path of pre-trained MODNet',
                     default='0')
 parser.add_argument('--save_img', type=bool, help='path of pre-trained MODNet',
@@ -147,7 +147,10 @@ if __name__ == '__main__':
                 label_img,
                 label_alpha,
                 trimap,
-                prior)
+                instance_map=prior,
+                fusion=False,
+                interac=args.inter_num
+            )
             label_img = input
             alea_sum += torch.mean(un)
             epis_sum += torch.mean(last_un)
