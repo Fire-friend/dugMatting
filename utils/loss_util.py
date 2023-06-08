@@ -1,9 +1,4 @@
-import torch
-import torch.nn.functional as F
-import kornia
-from torch import nn
-
-from evaluate import *
+from utils.evaluate import *
 
 
 def crop_patch(x, idx, size, padding):
