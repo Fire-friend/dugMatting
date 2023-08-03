@@ -1,4 +1,4 @@
-## dugMatting: Decomposed-Uncertainty-Guided Matting [ICML 2023]
+## dugMatting: Decomposed-Uncertainty-Guided Matting [ICML 2023 ([arxiv](https://arxiv.org/abs/2306.01452))]
 
 ![Image](https://github.com/Fire-friend/dugMatting/blob/main/temp_fig/method.png?raw=true)
 
