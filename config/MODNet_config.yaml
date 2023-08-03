@@ -32,12 +32,12 @@ fgPath_denoise: ''
 
 val_size: 1600
 
-im_path: /data/yao/wjw/P3M/P3M-10k/train/blurred_image/
+im_path: /data/P3M-10k/train/blurred_image/
 fg_path: ''
 bg_path: ''
-gt_path: /data/yao/wjw/P3M/P3M-10k/train/mask/
-val_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
-val_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/
+gt_path: /data/P3M-10k/train/mask/
+val_img_path: /data/P3M-10k/validation/P3M-500-P/blurred_image/
+val_gt_path: /data/P3M-10k/validation/P3M-500-P/mask/
 trimap_path: ''
-show_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
-show_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/
+show_img_path: /data/P3M-10k/validation/P3M-500-P/blurred_image/
+show_gt_path: /data/P3M-10k/validation/P3M-500-P/mask/

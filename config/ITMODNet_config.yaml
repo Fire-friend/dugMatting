@@ -1,19 +1,19 @@
-loader_mode: P3MP
-use_user_map: true
-fusion: false
-inter_num: 2
-gpu: '2,3'
-backbone: mobilenetv2 #mobilenetv2_human
-data_set: P3M
-save_file: 1
-img_size: 512
-crop_size: 512
+loader_mode: P3MP # the name of dataloader, determing the loader file
+use_user_map: true # Whether using user map
+fusion: false # Whether using fusion
+inter_num: 2 # The number of selection interaction
+gpu: '2,3' # gpu
+backbone: mobilenetv2 # mobilenetv2_human
+data_set: P3M # the name of dataset
+save_file: 1 # the name of save directory
+img_size: 512 # load size for input image
+crop_size: 512 # load size for input image
 batch_size: 8
-num_worker: 8
+num_worker: 8 # the number of loader threads
 pretrain_path: ''
-lr: 0.0005
-weight: 0.0005
-port: 23549
+lr: 0.0005 # learning rate
+weight: 0.0005 # weight decay
+port: 23549 # port of DDP
 epoch: 100
 aug_mixup: false
 aug_shadow: true
@@ -21,9 +21,9 @@ aug_crop: false
 val_per_epoch: 1
 show_per_epoch: 150
 save_per_epoch: 5
-in_channels: 4
-hr_channels: 32
-warmup_step: 5
+in_channels: 4 # input channel of network
+hr_channels: 32 # MODnet channels
+warmup_step: 5 # the number of warmup epoch
 amp: true
 
 rssn_denoise: false
@@ -32,12 +32,12 @@ fgPath_denoise: ''
 
 val_size: 1600
 
-im_path: /data/yao/wjw/P3M/P3M-10k/train/blurred_image/
+im_path: /data/P3M-10k/train/blurred_image/
 fg_path: ''
 bg_path: ''
-gt_path: /data/yao/wjw/P3M/P3M-10k/train/mask/
-val_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
-val_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/
+gt_path: /data/P3M-10k/train/mask/
+val_img_path: /data/P3M-10k/validation/P3M-500-P/blurred_image/
+val_gt_path: /data/P3M-10k/validation/P3M-500-P/mask/
 trimap_path: ''
-show_img_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/blurred_image/
-show_gt_path: /data/yao/wjw/P3M/P3M-10k/validation/P3M-500-P/mask/
+show_img_path: /data/P3M-10k/validation/P3M-500-P/blurred_image/
+show_gt_path: /data/P3M-10k/validation/P3M-500-P/mask/
