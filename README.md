@@ -4,7 +4,7 @@
 
 > ### News:
 >
-> [2023-8-3]: Publish the more detailed document.
+> [2023-8-3]: Publish the more detailed documentation.
 >
 > [2023-6-1]: Publish the rough code for studying dugMatting (MODNet) only.
 
