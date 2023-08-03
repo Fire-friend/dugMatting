@@ -14,7 +14,7 @@ Cutting out an object and estimating its opacity mask, known as image matting, i
 
 **Training**:
 
-We built a standard framework that supports distributed training and easy to extend custom methods. 
+We built a standard framework that supports distributed training and easy to extend custom methods. The custom instruction can be seen in [here]().
 
 You can modify the  *config/ITMODNet_config.yaml* and then run as follows:
 
@@ -26,6 +26,6 @@ You can modify the  *config/ITMODNet_config.yaml* and then run as follows:
 
 ------
 
-## Custom guideline
+## \hypertarget{ci}{Custom instruction}
 
 The components of *dataloader, model, traner, evaluater, config*, etc. are separated. If you want to add a custom method or loader, the main guideline is as follows:
